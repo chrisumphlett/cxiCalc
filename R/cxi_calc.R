@@ -31,15 +31,15 @@ cxi_calc <- function(survey_data, ...) {
   survey_transpose <- survey_transpose(survey_data, ...)
   
   cxi <- survey_transpose %>%
-    dplyr::group_by(..., survey_transpose$question, survey_transpose$response_class) %>%
+    dplyr::group_by(..., .data$question, .data$response_class) %>%
     dplyr::summarise(count = n()) %>%
     dplyr::ungroup() %>%
-    tidyr::spread(survey_transpose$response_class, count) %>%
-    dplyr::mutate(High = if_else(is.na(survey_transpose$High), 0, as.numeric(survey_transpose$High)),
-                  Mid = if_else(is.na(survey_transpose$Mid), 0, as.numeric(survey_transpose$Mid)),
-                  Low = if_else(is.na(survey_transpose$Low), 0, as.numeric(survey_transpose$Low)),
-                  question_score = (survey_transpose$High - survey_transpose$Low) / 
-                    (survey_transpose$High + survey_transpose$Mid + survey_transpose$Low) * 100)
+    tidyr::spread(.data$response_class, count) %>%
+    dplyr::mutate(High = if_else(is.na(.data$High), 0, as.numeric(.data$High)),
+                  Mid = if_else(is.na(.data$Mid), 0, as.numeric(.data$Mid)),
+                  Low = if_else(is.na(.data$Low), 0, as.numeric(.data$Low)),
+                  question_score = (.data$High - .data$Low) / 
+                    (.data$High + .data$Mid + .data$Low) * 100)
   
   cxi2 <- cxi %>%
     dplyr::group_by(...) %>%
