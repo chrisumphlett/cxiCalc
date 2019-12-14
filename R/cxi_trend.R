@@ -41,7 +41,7 @@ cxi_trend <- function(survey_data, trend_var, min_surveys, avg_surveys, ...) {
   survey_transpose <- survey_transpose(survey_data, ...)
   
   cxi <- survey_transpose %>%
-    dplyr::group_by(..., {{trend_var}}, question, response_class) %>%
+    dplyr::group_by(..., {{trend_var}}, {{survey_transpose}}$question, {{survey_transpose}}$response_class) %>%
     dplyr::summarise(count = n()) %>%
     dplyr::ungroup() %>%
     tidyr::spread(response_class, count) %>%

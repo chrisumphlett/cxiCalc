@@ -21,7 +21,8 @@
 survey_transpose <- function(survey_data, ...) {
   survey_transpose <- {{survey_data}} %>%
     # dplyr::select(survey_id, ..., needs, ease, emotion) %>%
-    tidyr::pivot_longer(cols = c(needs, ease, emotion), names_to = "question", values_to = "response") %>%
+    tidyr::pivot_longer(cols = c({{survey_data}}$needs, {{survey_data}}$ease, {{survey_data}}$emotion),
+                        names_to = "question", values_to = "response") %>%
     dplyr::mutate(response_class = case_when(
       response >= 4 ~ "High",
       response <= 2 ~ "Low",
