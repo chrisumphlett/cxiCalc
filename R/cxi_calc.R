@@ -35,11 +35,11 @@ cxi_calc <- function(survey_data, ...) {
     dplyr::summarise(count = n()) %>%
     dplyr::ungroup() %>%
     tidyr::spread(.data$response_class, count) %>%
-    dplyr::mutate(High = if_else(is.na(High), 0, as.numeric(High)),
-                  Mid = if_else(is.na(Mid), 0, as.numeric(Mid)),
-                  Low = if_else(is.na(Low), 0, as.numeric(Low)),
-                  question_score = (High - Low) / 
-                    (High + Mid + Low) * 100)
+    dplyr::mutate(High = if_else(is.na(.data$High), 0, as.numeric(.data$High)),
+                  Mid = if_else(is.na(.data$Mid), 0, as.numeric(.data$Mid)),
+                  Low = if_else(is.na(.data$Low), 0, as.numeric(.data$Low)),
+                  question_score = (.data$High - .data$Low) / 
+                    (.data$High + .data$Mid + .data$Low) * 100)
   
   cxi2 <- cxi %>%
     dplyr::group_by(...) %>%

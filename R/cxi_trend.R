@@ -41,28 +41,29 @@ cxi_trend <- function(survey_data, trend_var, min_surveys, avg_surveys, ...) {
   survey_transpose <- survey_transpose(survey_data, ...)
   
   cxi <- survey_transpose %>%
-    dplyr::group_by(..., {{trend_var}}, {{survey_transpose}}$question, {{survey_transpose}}$response_class) %>%
+    dplyr::group_by(..., {{trend_var}}, .data$question, .data$response_class) %>%
     dplyr::summarise(count = n()) %>%
     dplyr::ungroup() %>%
-    tidyr::spread(response_class, count) %>%
-    dplyr::mutate(High = if_else(is.na(High), 0, as.numeric(High)),
-                  Mid = if_else(is.na(Mid), 0, as.numeric(Mid)),
-                  Low = if_else(is.na(Low), 0, as.numeric(Low)),
-                  question_score = (High - Low) / (High + Mid + Low) * 100)
+    tidyr::spread(.data$response_class, count) %>%
+    dplyr::mutate(High = if_else(is.na(.data$High), 0, as.numeric(.data$High)),
+                  Mid = if_else(is.na(.data$Mid), 0, as.numeric(.data$Mid)),
+                  Low = if_else(is.na(.data$Low), 0, as.numeric(.data$Low)),
+                  question_score = (.data$High - .data$Low) / 
+                    (.data$High + .data$Mid + .data$Low) * 100)
   
   cxi2 <- cxi %>%
     dplyr::group_by(..., {{trend_var}}) %>%
-    dplyr::summarise(cxi = mean(question_score),
-                     survey_count = sum(High + Low + Mid) / 3) %>%
+    dplyr::summarise(cxi = mean(.data$question_score),
+                     survey_count = sum(.data$High + .data$Low + .data$Mid) / 3) %>%
     dplyr::ungroup()
   
   cxi3 <- cxi2 %>%
     dplyr::group_by(...) %>%
-    dplyr::summarise(avg_survey_ct = mean(survey_count),
-                     min_survey_ct = min(survey_count)) %>%
+    dplyr::summarise(avg_survey_ct = mean(.data$survey_count),
+                     min_survey_ct = min(.data$survey_count)) %>%
     dplyr::ungroup() %>%
     dplyr::inner_join(cxi2) %>%
-    dplyr::filter(avg_survey_ct >= avg_surveys, min_survey_ct >= min_surveys)
+    dplyr::filter(.data$avg_survey_ct >= avg_surveys, .data$min_survey_ct >= min_surveys)
   
   
   return(cxi3)
