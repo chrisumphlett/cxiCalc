@@ -26,25 +26,30 @@
 #' 
 #' @export
 
-cxi_calc <- function(survey_data, ...) {
+cxi_calc <- function(survey_data, cx_high = 4, cx_low = 2,...) {
+  cx_high2 <- cx_high
+  cx_low2 <- cx_low
   
-  survey_transpose <- survey_transpose(survey_data, ...)
+  survey_transpose <- survey_transpose(survey_data, cx_high = cx_high2, cx_low = cx_low2, ...)
+  
+  cols <- c(HIGH = NA_real_, MID = NA_real_, LOW = NA_real_)
   
   cxi <- survey_transpose %>%
     dplyr::group_by(..., .data$question, .data$response_class) %>%
     dplyr::summarise(count = n()) %>%
     dplyr::ungroup() %>%
     tidyr::spread(.data$response_class, count) %>%
-    dplyr::mutate(High = if_else(is.na(.data$High), 0, as.numeric(.data$High)),
-                  Mid = if_else(is.na(.data$Mid), 0, as.numeric(.data$Mid)),
-                  Low = if_else(is.na(.data$Low), 0, as.numeric(.data$Low)),
-                  question_score = (.data$High - .data$Low) / 
-                    (.data$High + .data$Mid + .data$Low) * 100)
+    add_column(!!!cols[!names(cols) %in% names(.)]) %>%
+    dplyr::mutate(HIGH = if_else(is.na(.data$HIGH), 0, as.numeric(.data$HIGH)),
+                  MID = if_else(is.na(.data$MID), 0, as.numeric(.data$MID)),
+                  LOW = if_else(is.na(.data$LOW), 0, as.numeric(.data$LOW)),
+                  question_score = (.data$HIGH - .data$LOW) / 
+                    (.data$HIGH + .data$MID + .data$LOW) * 100)
   
   cxi2 <- cxi %>%
     dplyr::group_by(...) %>%
     dplyr::summarise(cxi = mean(.data$question_score),
-                     survey_count = sum(.data$High + .data$Low + .data$Mid) / 3) %>%
+                     survey_count = sum(.data$HIGH + .data$LOW + .data$MID) / 3) %>%
     dplyr::ungroup()
   
   return(cxi2)

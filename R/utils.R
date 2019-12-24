@@ -16,18 +16,20 @@
 #' @import dplyr
 #' @importFrom magrittr "%>%"
 #' @import tidyr
+#' @noRd
 
 
-survey_transpose <- function(survey_data, ...) {
+survey_transpose <- function(survey_data, cx_high, cx_low, ...) {
+
   survey_transpose <- {{survey_data}} %>%
     # dplyr::select(survey_id, ..., needs, ease, emotion) %>%
     tidyr::pivot_longer(cols = c(.data$needs, .data$ease, .data$emotion),
                         names_to = "question", values_to = "response", values_ptypes = list(val = 'character')) %>%
-    dplyr::mutate(response_class = case_when(
-      response >= 4 ~ "High",
-      response <= 2 ~ "Low",
-      TRUE ~ "Mid")) %>%
+    dplyr::mutate(response_class = dplyr::case_when(
+      response >= cx_high ~ "HIGH",
+      response <= cx_low ~ "LOW",
+      TRUE ~ "MID")) %>%
     dplyr::select(-.data$response)
-  
+  print("a")
   return(survey_transpose)
 }
